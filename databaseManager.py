@@ -21,26 +21,42 @@ DB1 = sqlite3.connect(db1name)
 TIMEZONE = None  # maybe change later
 
 
+# The input must include the table the command is affecting if it is not a raw SQL command.
+# Raw SQL commands are run without other checking.
+# No security or feedback is provided for such commands as it is not within the scope of this project.
 def parsejsonintocommand(jsoninput):
     try:
-        # parse json here
+        # parse json string here
         readout = json.loads(jsoninput)
+        assert(isinstance(readout, dict))
+    except AssertionError:
+        log.error("received jsoninput could not be parsed into a dictionary")
+        return None
     except:
         log.error("json input could not be parsed")
         return None
+
+    if readout['commandtype'] == "RAW":
+        cursor = DB1.cursor()
+        log.debug("This is not safe, and may not exist in the final version")
+        returnvalue = cursor.execute(jsoninput['command'])
+        DB1.commit()
+        print(returnvalue)
+        return returnvalue
+        # TODO: continue work here
 
     try:
         tablename = readout['tablename']
         assert(tablenamechecker(tablename))
         assert(isinstance(tablename, str))
     except AssertionError:
-        log.error("tablename in received json input is not acceptable")
+        log.error("tablename in received json input is not a string")
         return None
     except KeyError:
         log.error("tablename not found in json input")
         return None
 
-    readout["time_received"] = datetime.datetime.now(tz = TIMEZONE)
+    readout["time_received"] = datetime.datetime.now(tz=TIMEZONE)
     fieldnames = getschema(DB1, tablename)
     inputs = []
     for name in fieldnames:
@@ -48,6 +64,7 @@ def parsejsonintocommand(jsoninput):
             inputs += [readout[name]]
         except KeyError:
             inputs += [None]
+
 
     insertintotable(DB1, tablename, inputs, len(fieldnames))
 
@@ -57,16 +74,16 @@ def parsejsonintocommand(jsoninput):
 # All other characters must be letters, numbers or underscore
 def tablenamechecker(tablename):
     if len(tablename) == 0:
-        log.debug("Failure due to empty table name.")
+        log.error("Failure in tablenamechecker() due to empty table name.")
         return False
     if tablename[0] in string.ascii_letters or tablename[0] == '_':
         for c in tablename:
             if c not in VALID_CHARACTERS:
-                log.debug("Failure due to table name containing non-alphanumeric characters.")
+                log.error("Failure in tablenamechecker() due to table name containing non-alphanumeric characters.")
                 return False
         log.debug("Success in checking table name")
         return True
-    log.debug("Failure due to table name starting with invalid character")
+    log.error("Failure in tablenamechecker() due to table name starting with invalid character")
     return False
 
 
