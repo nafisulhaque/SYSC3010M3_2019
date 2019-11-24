@@ -38,35 +38,61 @@ def parsejsonintocommand(jsoninput):
 
     if readout['commandtype'] == "RAW":
         cursor = DB1.cursor()
-        log.debug("This is not safe, and may not exist in the final version")
-        returnvalue = cursor.execute(jsoninput['command'])
+        log.info("This is not safe, and may not exist in the final version")
+        returnvalue = cursor.execute(readout['command']).fetchone()
         DB1.commit()
-        print(returnvalue)
+        print(returnvalue)  # prints the return value from the command
         return returnvalue
-        # TODO: continue work here
 
-    try:
-        tablename = readout['tablename']
-        assert(tablenamechecker(tablename))
-        assert(isinstance(tablename, str))
-    except AssertionError:
-        log.error("tablename in received json input is not a string")
-        return None
-    except KeyError:
-        log.error("tablename not found in json input")
-        return None
+    elif "insert" == readout['commandtype'].strip().lower():
+        log.debug("Inserting into database")
 
-    readout["time_received"] = datetime.datetime.now(tz=TIMEZONE)
-    fieldnames = getschema(DB1, tablename)
-    inputs = []
-    for name in fieldnames:
         try:
-            inputs += [readout[name]]
+            tablename = readout['tablename']
+            assert(tablenamechecker(tablename))
+            assert(isinstance(tablename, str))
+        except AssertionError:
+            log.error("tablename in received json input is not a string")
+            return None
         except KeyError:
-            inputs += [None]
+            log.error("tablename not found in json input")
+            return None
 
+        readout["time_received"] = datetime.datetime.now(tz=TIMEZONE)
+        fieldnames = getschema(DB1, tablename)
+        inputs = []
+        for name in fieldnames:
+            try:
+                inputs += [readout[name]]
+            except KeyError:
+                inputs += [None]
+        insertintotable(DB1, tablename, inputs, len(fieldnames))
 
-    insertintotable(DB1, tablename, inputs, len(fieldnames))
+    elif "read" == readout['commandtype'].strip().lower():
+
+        try:
+            tablename = readout['tablename']
+            assert(tablenamechecker(tablename))
+            assert(isinstance(tablename, str))
+        except AssertionError:
+            log.error("tablename in received json input is not a string")
+            return None
+        except KeyError:
+            log.error("tablename not found in json input")
+            return None
+
+        try:
+            numlines = readout['numlines']
+            numlines = int(numlines)
+        except KeyError:
+            log.error("numlines not found in json input")
+            return None
+        except ValueError:
+            log.error("numlines is not an integer, or is not properly formatted")
+
+    else:
+        log.error("No command read, skipping")
+        return None
 
 
 # This does not accept all valid table names, but will keep most conventional ones and all the ones we use.
@@ -148,7 +174,8 @@ def readlastnlines(tableobj, tablename, n):
 
 
 
-getschema(DB1, "testing")
-readlastnlines(DB1, "testing", 4)
-asdf = json.dumps({"a": 3, "b": 4, "c": 5, "tablename": "testing", "time": 1234, "id": 123, "name": "qwer"})
-parsejsonintocommand(asdf)
+#getschema(DB1, "testing")
+#readlastnlines(DB1, "testing", 4)
+asdf = json.dumps({"commandtype": "RAW", "tablename": "testing", "time": 1234, "id": 123, "name": "qwer", "command": "SELECT Count(*) FROM testing"})
+print(parsejsonintocommand(asdf))
+
