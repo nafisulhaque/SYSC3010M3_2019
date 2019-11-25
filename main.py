@@ -15,6 +15,7 @@ else:
 log = logging.getLogger(__name__)
 counter = 0
 
+
 def readinggenerator():
     global counter
     reading = dict()
@@ -29,22 +30,16 @@ def readinggenerator():
 
     return reading
 
-
 # parsejsonintocommand testing
 
-print("hello!")
 invalidinput = list()
 invalidinput.append(databaseManager.parsejsonintocommand(147174771.8383) is None)
 invalidinput.append(databaseManager.parsejsonintocommand(json.dumps(["RAW", "PRAGMA table_info(readings);"])) is None)
 invalidinput.append(databaseManager.parsejsonintocommand("foaiwehofhaosuhdfisuhidfhsdilhafsudhflsaiudhfaiuhsidufh") is None)
 
-print("Testing for invalid json inputs: " + str(invalidinput))
 
-#a = databaseManager.parsejsonintocommand(json.dumps({"commandtype": "RAW", "command": "PRAGMA table_info(readings);"}))
-#c = [item[1] for item in a]
-#print(c)
 
-#assert databaseManager.parsejsonintocommand(json.dumps({"command": "PRAGMA table_info(readings);"})) is None
+
 
 a = readinggenerator()
 del a["tablename"]
@@ -61,7 +56,12 @@ jsonwithouttableinput = list()
 for item in testarray:
     jsonwithouttableinput.append(databaseManager.parsejsonintocommand(json.dumps(item)) is None)
 
-print("Testing for valid json without table inputs: " + str(jsonwithouttableinput))
+for i in range(len(jsonwithouttableinput)):
+    if jsonwithouttableinput[i] is False:
+        print("Failure in invalid json input test")
+        print("Test failed with input: " + str(testarray[i]))
+
+
 
 testarray = [readinggenerator(), readinggenerator(), readinggenerator()]
 del testarray[1]["temp"]
@@ -70,6 +70,14 @@ fulljsoninput = list()
 for item in testarray:
     fulljsoninput.append(databaseManager.parsejsonintocommand(json.dumps(item)) is not None)
 
+for i in range(len(fulljsoninput)):
+    if fulljsoninput[i] is False:
+        print("Failure in valid json input test")
+        print("Test failed with input: " + str(testarray[i]))
+
+
+print("Testing for invalid json inputs: " + str(invalidinput))
+print("Testing for valid json without table inputs: " + str(jsonwithouttableinput))
 print("Testing for valid json inputs: " + str(fulljsoninput))
 
 
