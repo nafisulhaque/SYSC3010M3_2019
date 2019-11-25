@@ -40,9 +40,8 @@ def parsejsonintocommand(jsoninput):
     if readout['commandtype'] == "RAW":
         cursor = DB1.cursor()
         log.info("This is not safe, and may not exist in the final version")
-        returnvalue = cursor.execute(readout['command']).fetchone()
+        returnvalue = cursor.execute(readout['command']).fetchall()
         DB1.commit()
-        print(returnvalue)  # prints the return value from the command
         return returnvalue
 
     elif "insert" == readout['commandtype'].strip().lower():
@@ -67,7 +66,17 @@ def parsejsonintocommand(jsoninput):
                 inputs += [readout[name]]
             except KeyError:
                 inputs += [None]
-        insertintotable(DB1, tablename, inputs, len(fieldnames))
+        try:
+            return insertintotable(DB1, tablename, inputs, len(fieldnames))
+        except ValueError:
+            log.error("Value error when attempting to insert into table")
+            return None
+        except IndexError:
+            log.error("Index error when attempting to insert into table")
+            return None
+        except sqlite3.IntegrityError:
+            log.error("Integrity error when attempting to insert into table")
+            return None
 
     elif "read" == readout['commandtype'].strip().lower():
 
@@ -124,7 +133,7 @@ def getschema(tableobj, tablename):
         command = "PRAGMA table_info(" + tablename + ");"
         cursor.execute(command)
         fieldnames = [x[1] for x in cursor.fetchall()]
-        print(fieldnames)
+        #print(fieldnames)
         return fieldnames
     log.error("tablename is incorrect in getschema()")
     return None
@@ -144,8 +153,13 @@ def insertintotable(tableobj, tablename, inputs, tablewidth):
     command = command[:-2] + ");"
 
     cursor = tableobj.cursor()
-    cursor.execute(command, inputs)
+    try:
+        cursor.execute(command, inputs)
+    except sqlite3.IntegrityError:
+        raise sqlite3.IntegrityError
+        return
     tableobj.commit()
+    return True
 
 
 # reading more lines than there are lines in the table will return only the number of lines in the table.
