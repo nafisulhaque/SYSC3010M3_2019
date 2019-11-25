@@ -13,7 +13,7 @@ if __name__ == "__main__":
 log = logging.getLogger(__name__)
 
 # testing and debug variables
-db1name = "C:/SQLite/example.db"  # change to relative path later, include ability to have more database files
+db1name = "./main.db"  # change to relative path later, include ability to have more database files
 
 # Constants
 VALID_CHARACTERS = string.ascii_letters + string.digits + '_'
@@ -29,6 +29,7 @@ def parsejsonintocommand(jsoninput):
         # parse json string here
         readout = json.loads(jsoninput)
         assert(isinstance(readout, dict))
+        assert(isinstance(readout['commandtype'], str))
     except AssertionError:
         log.error("received jsoninput could not be parsed into a dictionary")
         return None
@@ -89,6 +90,9 @@ def parsejsonintocommand(jsoninput):
             return None
         except ValueError:
             log.error("numlines is not an integer, or is not properly formatted")
+            return None
+
+        return readlastnlines(DB1, tablename, numlines)
 
     else:
         log.error("No command read, skipping")
@@ -176,6 +180,6 @@ def readlastnlines(tableobj, tablename, n):
 
 #getschema(DB1, "testing")
 #readlastnlines(DB1, "testing", 4)
-asdf = json.dumps({"commandtype": "RAW", "tablename": "testing", "time": 1234, "id": 123, "name": "qwer", "command": "SELECT Count(*) FROM testing"})
-print(parsejsonintocommand(asdf))
+#asdf = json.dumps({"commandtype": "RAW", "tablename": "testing", "time": 1234, "id": 123, "name": "qwer", "command": "SELECT Count(*) FROM testing"})
+#print(parsejsonintocommand(asdf))
 
