@@ -19,8 +19,15 @@ log = logging.getLogger(__name__)
 
 
 class SocketHandler:
+    """
+    How to use this object:
+    First add listeners to different ports. Then use the run() function to start the listener thread.
+    Send data by calling socketsender(). data and host should be strings, port is a int
+    To get the data call getinput(). This returns a tuple, the first value is data, the second is the sending address.
+    """
     # https://stackoverflow.com/questions/15365406/run-class-methods-in-threads-python
     def __init__(self):
+        self.run_thread = True
         self.inputbuffer = []
         self.inputbufferlock = threading.Lock()
         self.listeners = []
@@ -36,7 +43,7 @@ class SocketHandler:
             if True in tempports:
                 return False
         newsocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = ('localhost', port)
+        server_address = ('', port)
         newsocket.bind(server_address)
         newsocket.setblocking(0)
         newlistener = (port, newsocket)
@@ -63,29 +70,21 @@ class SocketHandler:
         This function is run by a thread and places all data into the input buffer.
         It hopefully doesn't really need to be threaded but I did so anyways. \o.o/
         """
-        self.listenerslock.acquire()
-        templisteners = [listener[1] for listener in self.listeners]
-        print(templisteners)
-        ready_to_read, ready_to_write, in_error = \
-            select.select(templisteners, [], [], 30.0)  # 30 second timeout, should work
-        for s in ready_to_read:
-            buf, address = s.recvfrom(port)
-            
-            self.inputbufferlock.acquire()
-            inputbuffer.append((buf, address))
-            self.inputbufferlock.release()
+        while self.run_thread:
+            self.listenerslock.acquire()
+            templisteners = [listener[1] for listener in self.listeners]
+            ready_to_read, ready_to_write, in_error = \
+                select.select(templisteners, [], [], 10.0)  # 10 second timeout, should work
+            for s in ready_to_read:
+                buf, address = s.recvfrom(8192)
 
-        self.listenerslock.release()
+                self.inputbufferlock.acquire()
+                self.inputbuffer.append((buf, address))
+                log.info("Received %s bytes from %s: " % (len(buf), address))
+                self.inputbufferlock.release()
 
-        buf, address = s.recvfrom(port)
-
-        #print ("Received %s bytes from %s %s: " % (len(buf), address, buf ))
-        #print (buf.decode('utf-8'))
-        print("Received %s bytes from %s %s: " % (len(buf), address, json.loads(buf.decode('utf-8'))))
-        x = json.loads(buf.decode('utf-8'))
-        # x = json.loads(x)
-        print(type(x))
-        print(x)
+            self.listenerslock.release()
+            time.sleep(0.1)
 
     def socketsender(self, host, port, data):
         port = int(port)
@@ -96,7 +95,7 @@ class SocketHandler:
         target_address = (host, port)
         print(target_address)
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.bind(target_address)
+        # s.bind(target_address)
 
         if not len(data):
             s.shutdown(1)
@@ -112,10 +111,10 @@ class SocketHandler:
 
 
 a = SocketHandler()
-#assert a.addlistener(1234)
+# assert a.addlistener(1234)
 assert a.addlistener(int(textport) + 1)
 print(a.listeners)
-#a.run()
+a.run()
 print(a.inputbuffer)
 while True:
     a.socketsender('localhost', textport, "Testtest")
