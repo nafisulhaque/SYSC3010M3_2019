@@ -1,3 +1,13 @@
+"""
+This file handles all database commands.
+
+The important function is parsejsonintocommand().
+It takes a jsonified (python dictionary) as a string, and attempts to run the contained command.
+
+
+Written by Dorian Wang
+"""
+
 import math
 import sys
 import sqlite3
@@ -25,6 +35,12 @@ TIMEZONE = None  # maybe change later
 # Raw SQL commands are run without other checking.
 # No security or feedback is provided for such commands as it is not within the scope of this project.
 def parsejsonintocommand(jsoninput):
+    """
+
+    :param jsoninput: string from a call from json.dumps(dict). The dict() must contain element 'commandtype'.
+    'commandtype' dictates the command run. 'insert' makes it add all elements with the same
+    :return:
+    """
     try:
         # parse json string here
         readout = json.loads(jsoninput)
