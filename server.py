@@ -11,7 +11,11 @@ log = logging.getLogger(__name__)
 
 RECV_PORT = 1001
 SEND_PORT = 1002
-ARDUINO = "192.168.1.1"
+try:
+    ARDUINO = argv[0]
+except IndexError:
+    ARDUINO = "192.168.1.1"
+
 
 sh = socketHandler.SocketHandler()
 sh.__init__()
