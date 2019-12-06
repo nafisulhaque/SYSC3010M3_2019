@@ -31,5 +31,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Acknowledgments
 
 * Thanks to all the various answerers on StackOverflow
-* [PurpleBooth](https://gist.github.com/PurpleBooth) for the github README example
+* **Billie Thompson** - [PurpleBooth](https://gist.github.com/PurpleBooth) for the github README example
 * Ben Earle for waking up early for the labs, as well as all the TA stuff
