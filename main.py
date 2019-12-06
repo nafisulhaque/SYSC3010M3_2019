@@ -15,7 +15,6 @@ else:
 log = logging.getLogger(__name__)
 counter = 0
 
-
 def readinggenerator():
     global counter
     reading = dict()
@@ -32,6 +31,7 @@ def readinggenerator():
 
 # parsejsonintocommand testing
 
+print("hello!")
 invalidinput = list()
 invalidinput.append(databaseManager.parsejsonintocommand(147174771.8383) is None)
 invalidinput.append(databaseManager.parsejsonintocommand(json.dumps(["RAW", "PRAGMA table_info(readings);"])) is None)
@@ -40,6 +40,13 @@ invalidinput.append(databaseManager.parsejsonintocommand("foaiwehofhaosuhdfisuhi
 
 
 
+print("Testing for invalid json inputs: " + str(invalidinput))
+
+#a = databaseManager.parsejsonintocommand(json.dumps({"commandtype": "RAW", "command": "PRAGMA table_info(readings);"}))
+#c = [item[1] for item in a]
+#print(c)
+
+#assert databaseManager.parsejsonintocommand(json.dumps({"command": "PRAGMA table_info(readings);"})) is None
 
 a = readinggenerator()
 del a["tablename"]
@@ -62,6 +69,7 @@ for i in range(len(jsonwithouttableinput)):
         print("Test failed with input: " + str(testarray[i]))
 
 
+print("Testing for valid json without table inputs: " + str(jsonwithouttableinput))
 
 testarray = [readinggenerator(), readinggenerator(), readinggenerator()]
 del testarray[1]["temp"]
