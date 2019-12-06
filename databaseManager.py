@@ -120,7 +120,7 @@ def parsejsonintocommand(jsoninput):
         return readlastnlines(DB1, tablename, numlines)
 
     else:
-        log.error("No command read, skipping")
+        log.info("No command read, skipping")
         return None
 
 

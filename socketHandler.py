@@ -122,22 +122,12 @@ class SocketHandler:
 
         return value
 
-
     def run(self):
         t = threading.Thread(target=self.socketlistener)
         t.start()
 
 
-a = SocketHandler()
-# assert a.addlistener(1234)
-assert a.addlistener(int(textport) + 1)
-print(a.listeners)
-a.run()
-print(a.inputbuffer)
-while True:
-    a.socketsender('localhost', textport, "Testtest")
-    time.sleep(1)
-    print(a.inputbuffer)
+
 
 
 
