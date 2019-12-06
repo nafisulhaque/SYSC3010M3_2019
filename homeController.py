@@ -53,7 +53,7 @@ def json_gen_send():
         "temp": temp,
         "hum": hum,
         "table": "readings",
-        "timeSent": str(datetime.now())
+        "timeSent": str(datetime.timestamp())
     }
 
     tempHumJSON = json.dumps(tempHumDict)

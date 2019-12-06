@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 RECV_PORT = 1001
 SEND_PORT = 1002
 try:
-    ARDUINO = argv[0]
+    ARDUINO = sys.argv[0]
 except IndexError:
     ARDUINO = "192.168.1.1"
 
@@ -36,7 +36,12 @@ while True:
         log.error("json could not be parsed")
 
     if value is None:
-        sh.socketsender(ARDUINO, SEND_PORT, a[0])
+        try:
+            sh.socketsender(ARDUINO, SEND_PORT, a[0])
+        except:
+            log.error("Could not pass to ARDUINO")
+            pass
+            # normally can't happen
     else:
         sh.socketsender(a[1], SEND_PORT, value)
 
