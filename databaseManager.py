@@ -23,12 +23,12 @@ if __name__ == "__main__":
 log = logging.getLogger(__name__)
 
 # testing and debug variables
-db1name = "./main.db"  # change to relative path later, include ability to have more database files
+db1name = "./main.db"  # file in local directory
 
 # Constants
 VALID_CHARACTERS = string.ascii_letters + string.digits + '_'
 DB1 = sqlite3.connect(db1name)
-TIMEZONE = None  # maybe change later
+TIMEZONE = None  # maybe change later, set to local timezone
 
 
 # The input must include the table the command is affecting if it is not a raw SQL command.
@@ -44,8 +44,8 @@ def parsejsonintocommand(jsoninput):
     try:
         # parse json string here
         readout = json.loads(jsoninput)
-        assert(isinstance(readout, dict))
-        assert(isinstance(readout['commandtype'], str))
+        assert (isinstance(readout, dict))
+        assert (isinstance(readout['commandtype'], str))
     except AssertionError:
         log.error("received jsoninput could not be parsed into a dictionary")
         return None
@@ -65,8 +65,8 @@ def parsejsonintocommand(jsoninput):
 
         try:
             tablename = readout['tablename']
-            assert(tablenamechecker(tablename))
-            assert(isinstance(tablename, str))
+            assert (tablenamechecker(tablename))
+            assert (isinstance(tablename, str))
         except AssertionError:
             log.error("tablename in received json input is not a string")
             return None
@@ -98,8 +98,8 @@ def parsejsonintocommand(jsoninput):
 
         try:
             tablename = readout['tablename']
-            assert(tablenamechecker(tablename))
-            assert(isinstance(tablename, str))
+            assert (tablenamechecker(tablename))
+            assert (isinstance(tablename, str))
         except AssertionError:
             log.error("tablename in received json input is not a string")
             return None
@@ -142,6 +142,7 @@ def tablenamechecker(tablename):
     return False
 
 
+# returns the schema of the specified table in a list.
 def getschema(tableobj, tablename):
     cursor = tableobj.cursor()
 
@@ -149,14 +150,13 @@ def getschema(tableobj, tablename):
         command = "PRAGMA table_info(" + tablename + ");"
         cursor.execute(command)
         fieldnames = [x[1] for x in cursor.fetchall()]
-        #print(fieldnames)
         return fieldnames
     log.error("tablename is incorrect in getschema()")
     return None
 
 
+# inserts the inputs dictionary into the table. If inputs are missing it will rely on SQLite defaults.
 def insertintotable(tableobj, tablename, inputs, tablewidth):
-
     tablename = tablename.strip()
     if tablenamechecker(tablename) is False:
         raise ValueError
@@ -165,7 +165,8 @@ def insertintotable(tableobj, tablename, inputs, tablewidth):
     if len(inputs) != tablewidth:
         raise IndexError  # number of inputs is too small or large
 
-    command = "insert into " + tablename + "(" + str(getschema(tableobj, tablename))[1:-1] + ") values(" + "?, " * tablewidth
+    command = "insert into " + tablename + "(" + str(getschema(tableobj, tablename))[
+                                                 1:-1] + ") values(" + "?, " * tablewidth
     command = command[:-2] + ");"
 
     cursor = tableobj.cursor()
@@ -178,7 +179,8 @@ def insertintotable(tableobj, tablename, inputs, tablewidth):
     return True
 
 
-# reading more lines than there are lines in the table will return only the number of lines in the table.
+# Reads n number or lines from the specified table.
+# Reading more lines than there are lines in the table will return only the number of lines in the table.
 def readlastnlines(tableobj, tablename, n):
     if n < 1:
         return None  # reading less than one line
@@ -203,13 +205,11 @@ def readlastnlines(tableobj, tablename, n):
 
     return rows
 
-
-
-value = readlastnlines(DB1, "readings", 4)
-value = json.dumps(value)
-value = json.loads(value)
-print(value)
-print(value[1]['timesent'])
-#asdf = json.dumps({"commandtype": "RAW", "tablename": "testing", "time": 1234, "id": 123, "name": "qwer", "command": "SELECT Count(*) FROM testing"})
-#print(parsejsonintocommand(asdf))
-
+# value = readlastnlines(DB1, "readings", 4)
+# value = json.dumps(value)
+# value = json.loads(value)
+# print(value)
+# print(value[1]['timesent'])
+# asdf = json.dumps({"commandtype": "RAW", "tablename": "testing", "time": 1234, "id": 123, "name": "qwer", \
+# "command": "SELECT Count(*) FROM testing"})
+# print(parsejsonintocommand(asdf))

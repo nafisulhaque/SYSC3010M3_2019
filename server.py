@@ -1,3 +1,12 @@
+"""
+This file handles all server functions.
+
+This file should be run on the server. It uses databaseManager and socketHandler.
+The ip address of the arduino controller may be provided to relay packets to.
+
+
+Written by Dorian Wang
+"""
 import databaseManager
 import socketHandler
 import sys
@@ -16,12 +25,13 @@ try:
 except IndexError:
     ARDUINO = "192.168.1.1"
 
-
+# socketHandler setup
 sh = socketHandler.SocketHandler()
 sh.__init__()
-sh.addlistener(RECV_PORT)
-sh.run()
+sh.addlistener(RECV_PORT)  # one listener now, more can be added later
+sh.run()  # start listeners
 
+#
 while True:
     time.sleep(0.2)
     a = sh.getinput()
