@@ -185,7 +185,7 @@ def readlastnlines(tableobj, tablename, n):
     tablename = tablename.strip()
     if tablenamechecker(tablename) is False:
         raise ValueError
-    command = "SELECT * FROM " + tablename + " ORDER BY time DESC LIMIT "
+    command = "SELECT * FROM " + tablename + " ORDER BY timesent DESC LIMIT "
     command = command + str(n) + ";"
 
     cursor = tableobj.cursor()
@@ -194,7 +194,6 @@ def readlastnlines(tableobj, tablename, n):
     # https://stackoverflow.com/questions/10195139/how-to-retrieve-sql-result-column-value-using-column-name-in-python
     # ty stack overflow
     fieldnames = [field[0] for field in cursor.description]
-    print (fieldnames)
     values = cursor.fetchone()
     rows = []
     while values is not None:
@@ -202,14 +201,15 @@ def readlastnlines(tableobj, tablename, n):
         values = cursor.fetchone()
         rows = rows + [row]
 
-    print(rows)
-
     return rows
 
 
 
-#getschema(DB1, "testing")
-#readlastnlines(DB1, "testing", 4)
+value = readlastnlines(DB1, "readings", 4)
+value = json.dumps(value)
+value = json.loads(value)
+print(value)
+print(value[1]['timesent'])
 #asdf = json.dumps({"commandtype": "RAW", "tablename": "testing", "time": 1234, "id": 123, "name": "qwer", "command": "SELECT Count(*) FROM testing"})
 #print(parsejsonintocommand(asdf))
 

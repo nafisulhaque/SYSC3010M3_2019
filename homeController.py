@@ -52,6 +52,7 @@ def json_gen_send():
         "command_type": "insert",
         "temp": temp,
         "hum": hum,
+        "table": "readings",
         "timeSent": str(datetime.now())
     }
 
