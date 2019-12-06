@@ -6,21 +6,21 @@ This project requires Python 3 (>= 3.4) and a formatted SQLite database file (ma
 
 ## How to Run
 Place
-'''
+```
 server.py
 databaseManager.py
 socketManager.py
 main.db
-'''
+```
 in a folder on the server machine.
 
 *Add stuff here for other parts
 
 ## How to Use
 Run the server program with administrator permissions in order to avoid problems with sockets.
-'''
+
 > sudo python3 server.py [arduino IP address]
-'''
+
 
 *Add stuff here for other parts
 
