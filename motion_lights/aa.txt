@@ -1,0 +1,16 @@
+val = digitalRead(PIRPIN);
+  currentMillis = millis();
+  if (val == HIGH) {
+    activateLB();
+  }
+  else if (val == LOW) {
+    delay(2000);
+    val = digitalRead(PIRPIN);
+    if (val == LOW) {
+      deactivateLB();
+    }
+  }
+  if ((currentMillis - previousMillis) >= interval) {
+    humTempMonitor();
+  }
+  opCodeGen();
